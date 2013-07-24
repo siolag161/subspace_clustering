@@ -1,0 +1,21 @@
+from km import *
+from clustering import *
+from measures import *
+from hungarian import *
+import unittest 
+
+class TestRanking(unittest.TestCase):
+    def test_precision(self):
+        clust_a = SubspaceCluster("clustering_id", [1,2,3,4,5], [1,2,3])
+        clust_b = SubspaceCluster("clustering_id", [3,4,5,7], [2,3,5,6,7])
+        precision_objs_ab = precision_sets(clust_a.objects, clust_b.objects)
+        precision_dims_ab = precision_sets(clust_a.dimensions, clust_b.dimensions)
+        self.assertEqual(precision_objs_ab, 3.0/5)
+        self.assertEqual(precision_dims_ab, 2.0/3)
+
+        clust_a = SubspaceCluster("clustering_id", [], [1,2,3])
+        clust_b = SubspaceCluster("clustering_id", [3,4,5,7], [])
+        precision_objs_ab = precision_sets(clust_a.objects, clust_b.objects)
+        precision_dims_ab = precision_sets(clust_a.dimensions, clust_b.dimensions)
+        self.assertEqual(precision_objs_ab, 0.0/5)
+        self.assertEqual(precision_dims_ab, 0.0/3)

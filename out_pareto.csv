@@ -1,0 +1,7 @@
+algorithm,parameters,run,clustering_id,spatial_coherence,distortion
+exhaustive_kmeans,"projection_size=4, k=4",13_07_23_13_27,"exhaustive_kmeans_(projection_size=4, k=4)_(13_07_23_13_27)_(1,4,13,14)",-0.12431825877510674,1.4807637471781179
+exhaustive_kmeans,"projection_size=4, k=4",13_07_23_13_27,"exhaustive_kmeans_(projection_size=4, k=4)_(13_07_23_13_27)_(1,14,13,6)",-0.11730008801776126,1.4766750468180385
+exhaustive_kmeans,"projection_size=4, k=4",13_07_23_13_28,"exhaustive_kmeans_(projection_size=4, k=4)_(13_07_23_13_28)_(9,4,13,6)",-0.07848008176969247,1.476340313479715
+exhaustive_kmeans,"projection_size=4, k=4",13_07_23_13_28,"exhaustive_kmeans_(projection_size=4, k=4)_(13_07_23_13_28)_(8,12,13,6)",-0.06393473349840688,1.4758559573345371
+exhaustive_kmeans,"projection_size=4, k=4",13_07_23_13_27,"exhaustive_kmeans_(projection_size=4, k=4)_(13_07_23_13_27)_(0,1,2,8)",-0.021355821070301904,1.4757583268015668
+exhaustive_kmeans,"projection_size=4, k=4",13_07_23_13_27,"exhaustive_kmeans_(projection_size=4, k=4)_(13_07_23_13_27)_(0,8,2,10)",-0.013938015740572404,1.474335209593666
