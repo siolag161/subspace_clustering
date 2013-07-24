@@ -4,7 +4,7 @@ from dominance import *
 
 ############################################### Entry point ##########################################################
 FIELD_BASIC = ["algorithm", "parameters", "run", "dimensions", "objects", "clustering_id"]  
-FIELD_MEASURE = ['spatial_coherence', 'distortion']
+#FIELD_MEASURE = ['spatial_coherence', 'distortion']
 CLUSTERING_FIELD_BASIC = ["algorithm", "parameters", "run", "clustering_id", ]   
 
 import sys, getopt
@@ -16,7 +16,7 @@ def usage():
     and the ouput (concerning the scores/ranks). Other options: redundancy filtering or not, output both clusterings/clusters or both,
     include or not the information regarding the ranks of each clustering in the list. TODO: add the parellelism """    
 
-    print '[USAGE]: subspace_clustering.py -i <inputfile> -r <reference-clustering path should be at the cluster_level> -o <outputfile> -c <output: 1 or cluster-level, otherwise it is clustering level> -f <Filtering or not> -t <in case of filtering is enabled, specifies which to output: the original (0), the filtered (1) or both (otherwise)>'
+    print '[USAGE]: subspace_clustering.py -i <inputfile> -r <reference-clustering path should be at the cluster_level> -o <outputfile> -c <output: 1 or cluster-level, otherwise it is clustering level> -f <Filtering or not> -t <in case of filtering is enabled, specifies which to output: the original (0), the filtered (1) or both (otherwise)> -d <dimension threshold> -o <object threshold>'
 
 def main(argv):
     """ TODO: look up algorithm in order to know whether it contains noise or not"""
@@ -71,11 +71,12 @@ def main(argv):
     begin_time = time.time()
     
     print 'reading %s to generate reference clustering...' %(reffile)
-    hidden_clustering = read_clusterings(ifile = inputfile, basic_fields =CLUSTERING_FIELD_BASIC,measure_fields=FIELD_MEASURE,
-                                contains_noise_ = noise, clustering_on_dimension_ = on_dim, is_cluster_level=True)[0]
+    hidden_clustering = read_clusterings(ifile = reffile, basic_fields =CLUSTERING_FIELD_BASIC,measure_fields=[],
+                                contains_noise_ = noise, clustering_on_dimension_ = on_dim, is_cluster_level=True)[0] 
 
+    
     print 'reading %s target clusterings...' %(reffile)
-    original_clusterings = read_clusterings(ifile = inputfile, basic_fields=CLUSTERING_FIELD_BASIC,measure_fields=FIELD_MEASURE,
+    original_clusterings = read_clusterings(ifile = inputfile, basic_fields=CLUSTERING_FIELD_BASIC,measure_fields=[],
                                 contains_noise_ = noise, clustering_on_dimension_ = on_dim, is_cluster_level=is_at_cluster_level)       
 
     
@@ -83,10 +84,12 @@ def main(argv):
     if redundancy_filtering:
         print 'processing the redundancy filtering...'
         filtered_clusterings = non_dominated_clusterings(original_clusterings, func, dim_thres = dims_thres,
-                                                         obj_thres = objs_thres, clustering_filter = True)
+                                                         obj_thres = objs_thres, clustering_filter = True)        
+
     else:
         filtered_clusterings = original_clusterings
 
+    print 'length of filtered_clusterings = %d' %(len(filtered_clusterings))
     measures = {'f1':lambda(x): f1_score_clustering(hidden_clustering, x),
                     'entropy': lambda(x): entropy_score_clustering(hidden_clustering, x),
                     'rnia': lambda(x): rnia_score(hidden_clustering, x),
@@ -97,13 +100,21 @@ def main(argv):
 
     print 'writing scored clusterings with ranks...'
     #write_clustering(clusterings, basic_fields, measure_fields, ofile, with_clusters = True)
-    write_clustering(clusterings = scored_clusterings, basic_fields = CLUSTERING_FIELD_BASIC,measure_fields=FIELD_MEASURE,
+    write_clustering(clusterings = scored_clusterings, basic_fields = CLUSTERING_FIELD_BASIC,measure_fields=[],
                      ofile=outputfile, with_clusters = True)
-    write_clustering(clusterings = scored_clusterings, basic_fields = CLUSTERING_FIELD_BASIC,measure_fields=FIELD_MEASURE,
-                     ofile="./test/ds_scoring_clusterings.csv", with_clusters = False)
+
+    ofname = ".%s_scoring.csv" %(get_file_name(outputfile))
+    write_clustering(clusterings = scored_clusterings, basic_fields = CLUSTERING_FIELD_BASIC,measure_fields=measures.keys(),
+                     ofile=ofname, with_clusters = False)
     print 'all done. time taken: %s' %(time.time()-begin_time)
         
 
+def get_file_name(file_path):
+    #fname = file_path.split('/')[-1]
+    fname = file_path.split('.')[-2]
+    return fname
+    
+    
 if __name__ == '__main__':
     import time
 

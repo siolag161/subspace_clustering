@@ -261,7 +261,7 @@ def rank_measure(clusterings, measures, measures_reverse = None):
             else:
                 data.append(clustering.__dict__[measure]) # reverse the sign in order to sort better            
         ranking = ss.rankdata(data)
-        print measure, data
+        #print measure, data
         rk_measure = 'rk_%s'% (measure)
         for i in xrange(len(clusterings)):
             clusterings[i].__dict__[rk_measure] = ranking[i]

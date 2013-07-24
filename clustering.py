@@ -151,11 +151,6 @@ def write_clustering(clusterings, basic_fields, measure_fields, ofile, with_clus
 
         
         for clustering in clusterings:
-            #print basic_fields, clustering.__dict__['clustering_id']
-
-            #print clustering.__dict__
-            clustering_written_count += 1
-            if (clustering_written_count % 200 == 0): print "already written: %d clusterings..." %(clustering_written_count)
             if with_clusters:
                 for cluster in clustering.clusters:
                     row_basic = dict((fn, clustering.__dict__[fn]) for fn in basic_fields if  clustering.__dict__.has_key(fn))
@@ -167,8 +162,6 @@ def write_clustering(clusterings, basic_fields, measure_fields, ofile, with_clus
                     row.update(row_measure)                   
                 
                     row.update({'objects': cluster.objects_str, 'dimensions': cluster.dimensions_str})
-
-                    #print row                
                     writer.writerow(row)
             else:
                 row_basic = dict((fn, clustering.__dict__[fn]) for fn in basic_fields if  clustering.__dict__.has_key(fn))
@@ -178,6 +171,12 @@ def write_clustering(clusterings, basic_fields, measure_fields, ofile, with_clus
                 writer.writerow(row)
             
 
+def generate_clustering_id(row):
+    clustering_id = "%s_(%s)_(%s)_(%s)" %(row['algorithm'], row['parameters'],
+                                          row['run'], row['dimensions'])
+    return clustering_id
+
+                
 def read_clusterings(ifile, basic_fields, measure_fields, contains_noise_ = False, clustering_on_dimension_ = False, is_cluster_level=True):
     """ import clustering from a csv-like text file. the field names are used to limit the fields we want to read
     return a list of clusterings. """
@@ -192,15 +191,20 @@ def read_clusterings(ifile, basic_fields, measure_fields, contains_noise_ = Fals
         field_names = list(basic_fields); field_names.extend(measure_fields)        
         reader = csv.DictReader(in_file,  dialect = file_dialect)
         
-        reader.next() 
+        #reader.next() 
 
         line_count = 0
         for row in reader:
+            clustering_id = row.get('clustering_id', None)
+            
+            if not clustering_id:
+                clustering_id = generate_clustering_id(row)
+                
+            
             clustering = SubspaceClustering(algorithm = row['algorithm'], parameters=row['parameters'], run=row['run'],
-                 clustering_id = row['clustering_id'], clusters = [],  
+                 clustering_id = clustering_id, clusters = [],  
                  contains_noise = contains_noise_, clustering_on_dimension =  clustering_on_dimension_)
 
-            clustering_id = row['clustering_id']
             clusterings.setdefault(clustering_id, clustering)
             if is_cluster_level:
                 cluster = SubspaceCluster(clustering_id, dimensions = row['dimensions'], objects = row['objects'])
