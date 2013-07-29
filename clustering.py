@@ -149,8 +149,9 @@ def write_clustering(clusterings, basic_fields, measure_fields, ofile, with_clus
         writer = csv.DictWriter(out_file, delimiter=',', fieldnames=fields)
         writer.writerow(dict((fn,fn) for fn in fields))
 
-        
-        for clustering in clusterings:
+        print with_clusters
+        for clustering in clusterings:           
+           
             if with_clusters:
                 for cluster in clustering.clusters:
                     row_basic = dict((fn, clustering.__dict__[fn]) for fn in basic_fields if  clustering.__dict__.has_key(fn))
@@ -169,6 +170,11 @@ def write_clustering(clusterings, basic_fields, measure_fields, ofile, with_clus
                 row = dict(row_basic)
                 row.update(row_measure)   
                 writer.writerow(row)
+                
+            clustering_written_count += 1
+            if (clustering_written_count % 50 == 0):
+                print 'has already written %d' %(clustering_written_count)
+           
             
 
 def generate_clustering_id(row):
