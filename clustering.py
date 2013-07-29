@@ -1,6 +1,7 @@
 
 ########## CLASSES #################
 def string_to_set(string, sep = ","):
+    #print string
     objects = set([int(elem) for elem in string.split(sep)])
     return objects
 
@@ -26,12 +27,14 @@ class SubspaceCluster:
 
     def _process_objects(self, objects, sep = ","):        
         typename = objects.__class__.__name__
+        
         if (typename == 'str'):
+            #print objects
             self.objects = string_to_set(objects, sep)            
             self.objects_str = objects
         else:
             """ list or set """
-            self.objects = set(sorted(objects))
+            self.objects = set(sorted(list(objects)))
             self.objects_str = list_to_string(self.objects)
             
     
@@ -47,40 +50,31 @@ class SubspaceCluster:
 
     
 class SubspaceClustering:
+    from subspace_algorithm import SubspaceAlgorithmLookup
+    lookup = SubspaceAlgorithmLookup()
     """ a class representing a subspace clustering: list of clusters"""
     def __init__(self, algorithm, parameters, run,
-                 clustering_id = None, clusters = [],  
-                 contains_noise = False, clustering_on_dimension = False):
+                 clustering_id = None, clusters = [], **args):
         self.algorithm = algorithm
         self.parameters = parameters
         self.run = run
-        self.clusters = clusters
-        
-        self.contains_noise = contains_noise        
-        self.clustering_on_dimension = clustering_on_dimension # to determine wherether we distingust clustering by their dimension projection or by run
+        self.clusters = clusters        
+        self.contains_noise = self.lookup.get_property(algorithm, 'contains_noise')
 
+        if args.has_key('max_cardinality'):
+            self.max_cardinality = args['max_cardinality']
+        
         if not clustering_id:
             self.clustering_id = self._generate_id()
         else:
             self.clustering_id  = clustering_id
 
 
-    def set_contains_noise(self, val):
-        self.contains_noise = val
-            
-    def contains_noise(self):
-        return self.contains_noise
-
-    def set_clustering_on_dimension(self, val):
-        self.clustering_on_dimension = val
-        self.clustering_id = self._generate_id()
-
     def _generate_id(self):
-        if self.clustering_on_dimension:
+        if self.lookup.get_property(self.algorithm, 'shares_dimension'):
             clustering_id = "%s_(%s)_(%s)_(%s)" %(self.algorithm, self.parameters, str(self.run), self.clusters[0].dimensions_str)
         else:
-            clustering_id = "%s_%s_%s" %(self.algorithm,self. parameters, str(self.run))
-                
+            clustering_id = "%s_%s_%s" %(self.algorithm,self. parameters, str(self.run))                
         return clustering_id
 
     def get_objects(self):
@@ -183,7 +177,7 @@ def generate_clustering_id(row):
     return clustering_id
 
                 
-def read_clusterings(ifile, basic_fields, measure_fields, contains_noise_ = False, clustering_on_dimension_ = False, is_cluster_level=True):
+def read_clusterings(ifile, basic_fields, measure_fields, is_cluster_level=True):
     """ import clustering from a csv-like text file. the field names are used to limit the fields we want to read
     return a list of clusterings. """
     import csv
@@ -208,8 +202,7 @@ def read_clusterings(ifile, basic_fields, measure_fields, contains_noise_ = Fals
                 
             
             clustering = SubspaceClustering(algorithm = row['algorithm'], parameters=row['parameters'], run=row['run'],
-                 clustering_id = clustering_id, clusters = [],  
-                 contains_noise = contains_noise_, clustering_on_dimension =  clustering_on_dimension_)
+                 clustering_id = clustering_id, clusters = [])
 
             clusterings.setdefault(clustering_id, clustering)
             if is_cluster_level:
@@ -252,9 +245,10 @@ def read_matrix_data(ifile):
 class KMClustering(SubspaceClustering, MeasureMixin):
     """ basically it is a subspace clustering but might contain some additonal information such as a list of measures/values"""
     def __init__(self, algorithm, parameters, run,
-                 clustering_id = None, clusters=[], ccontains_noise = False, cclustering_on_dimension = False, **measures):
+                 clustering_id = None, clusters=[], **measures):
         
-        SubspaceClustering.__init__(self, algorithm = algorithm, parameters = parameters, run = run, clustering_id = clustering_id, clusters=clusters,  contains_noise = ccontains_noise, clustering_on_dimension = cclustering_on_dimension)
+        SubspaceClustering.__init__(self, algorithm = algorithm, parameters = parameters, run = run,
+                                    clustering_id = clustering_id, clusters=clusters)
 
         MeasureMixin.__init__(self, **measures)
 

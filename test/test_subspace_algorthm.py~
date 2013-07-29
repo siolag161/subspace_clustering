@@ -1,0 +1,11 @@
+from km import *
+from clustering import *
+from measures import *
+from hungarian import *
+from dominance import *
+import dominance
+
+import unittest 
+
+class TestSubspaceAlgorithm(unittest.TestCase):
+    def test_is_similar_different_clustering(self):

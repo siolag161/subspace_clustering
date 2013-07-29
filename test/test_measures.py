@@ -60,7 +60,7 @@ class TestMeasures(unittest.TestCase):
         found_clust_13 = SubspaceCluster("found_clustering_id1", [4,6,7,8], [2,3,5,6,7])
         found_clustering_1 = SubspaceClustering(algorithm="kmeans", parameters="", run=1,
                  clustering_id = "found_clustering_1", clusters = [found_clust_11, found_clust_12,
-                 found_clust_13], contains_noise = False, clustering_on_dimension = False)
+                 found_clust_13])
 
         mapped = f1_hidden_cluster_map(hidden_clustering, found_clustering_1)
 
@@ -77,15 +77,14 @@ class TestMeasures(unittest.TestCase):
 
         found_clustering_2 = SubspaceClustering(algorithm="found_clustering_2", parameters="", run=2,
                  clustering_id = "found_clustering_2", clusters = [found_clust_21, found_clust_22,
-                 found_clust_23, found_clust_24, found_clust_25], contains_noise = False, clustering_on_dimension = False)
+                 found_clust_23, found_clust_24, found_clust_25])
         #self.assertEqual(f1_score_clustering(hidden_clustering, found_clustering_2), 0.5)
 
     def test_entropy(self):
         hidden_clust_1 = SubspaceCluster("hidden_clustering_id", [1,2,5,6], [1,2,3])
         hidden_clust_2 = SubspaceCluster("hidden_clustering_id", [3,7,8], [2,3,5,6,7])
         hidden_clustering = SubspaceClustering(algorithm="hidden_clustering", parameters="", run=1,
-                 clustering_id = "hidden_clustering_id", clusters = [hidden_clust_1, hidden_clust_2],
-                                               contains_noise = False, clustering_on_dimension = False)
+                 clustering_id = "hidden_clustering_id", clusters = [hidden_clust_1, hidden_clust_2])
         
         found_clust_11 = SubspaceCluster("found_clustering_id1", [1,2,5,6], [1,2,3])
         found_clust_12 = SubspaceCluster("found_clustering_id1", [3,7,8], [2,3,5,6,7])
@@ -94,7 +93,7 @@ class TestMeasures(unittest.TestCase):
 
         found_clustering_1 = SubspaceClustering(algorithm="kmeans", parameters="", run=1,
                  clustering_id = "found_clustering_1", clusters = [found_clust_11, found_clust_12,
-                 found_clust_13, found_clust_14], contains_noise = False, clustering_on_dimension = False)
+                 found_clust_13, found_clust_14])
 
         true_val = 1
         diff = (entropy_score_clustering(hidden_clustering, found_clustering_1)-true_val)
@@ -104,15 +103,13 @@ class TestMeasures(unittest.TestCase):
         hidden_clust_1 = SubspaceCluster("hidden_clustering_id", [1], [1,2,3])
         hidden_clust_2 = SubspaceCluster("hidden_clustering_id", [2], [2,3,5,6,7])
         hidden_clustering = SubspaceClustering(algorithm="hidden_clustering", parameters="", run=1,
-                 clustering_id = "hidden_clustering_id", clusters = [hidden_clust_1, hidden_clust_2],
-                                               contains_noise = False, clustering_on_dimension = False)
+                 clustering_id = "hidden_clustering_id", clusters = [hidden_clust_1, hidden_clust_2])
         
         found_clust_11 = SubspaceCluster("found_clustering_id1", [1,2], [1,2,3])
         found_clust_12 = SubspaceCluster("found_clustering_id1", [1,2], [2,3,5,6,7])
 
         found_clustering_1 = SubspaceClustering(algorithm="kmeans", parameters="", run=1,
-                 clustering_id = "found_clustering_1", clusters = [found_clust_11, found_clust_12 ],
-                                                contains_noise = False, clustering_on_dimension = False)
+                 clustering_id = "found_clustering_1", clusters = [found_clust_11, found_clust_12 ])
 
         true_val = 1
         diff = (entropy_score_clustering(hidden_clustering, found_clustering_1)-true_val)
@@ -196,3 +193,34 @@ class TestMeasures(unittest.TestCase):
         self.assertEqual(ce_score(ref_clustering, target_clustering), 1-19./25) 
 
     
+
+    def test_multiple_measures(self):
+        
+         
+        cl_a1 = SubspaceCluster("", [1,2,3,4],[3,4])
+        cl_a2 = SubspaceCluster("", [6,7],[4,5])
+        cl_a3 = SubspaceCluster("", [4,5,6],[7,8,9])
+
+        cl_b1 = SubspaceCluster("", [1,2],[3,4])
+        cl_b2 = SubspaceCluster("", [3,4],[3,4])
+        cl_b3 = SubspaceCluster("", [6,7],[5,6,7,8])
+
+        hidden_clustering = SubspaceClustering(algorithm="sckmeans1", parameters="", run=1,
+                 clustering_id = "found_clustering_1", clusters = [cl_a1, cl_a2, cl_a3],)
+        target_clustering = SubspaceClustering(algorithm="PROCLUS", parameters="", run=2,
+                 clustering_id = "found_clustering_2", clusters = [cl_b1, cl_b2, cl_b3], max_cardinality = 7)
+        
+        measures = {'f1':lambda(x): f1_score_clustering(hidden_clustering, x),
+                    'entropy': lambda(x): entropy_score_clustering(hidden_clustering, x),
+                'spatial_contiguity': lambda(x): spatial_coherence(x)[0],
+                    'rnia': lambda(x): rnia_score(hidden_clustering, x),
+                    'ce': lambda(x): ce_score(hidden_clustering, x) }
+
+        scores = {}
+        for measure_name, measure_func in measures.iteritems():
+            scores[measure_name] = measure_func(target_clustering)
+
+        expected_result = {'f1': 0.6666666666666666,
+                           'spatial_contiguity': 0.12499999999999994, 'entropy': 0.7634013424107036,
+                           'rnia': 0.48, 'ce': 0.23999999999999999} 
+        self.assertEqual(scores, 1-195./25) 

@@ -30,17 +30,17 @@ def main(argv):
     #rank_included = False
     redundancy_filtering = False
     filter_choice = 0    
-    on_dim = True
-    noise = False
+    #on_dim = True
+    #noise = False
     dims_thres = 0.5
     objs_thres = 0.5
     
     try:
-        opts, args = getopt.getopt(argv,"hi:o:c:f:t:r:n:j:d:",["ifile=", "ofile=", "clust", "redundant","filter","rfile","noise","dims","objt","dimt"])
+        opts, args = getopt.getopt(argv,"hi:o:c:f:t:r:",["ifile=", "ofile=", "clust", "redundant",
+                                                                  "filter","rfile","noise"])
     except getopt.GetoptError:    
         usage()    
         sys.exit(2)
-
     
     for opt, arg in opts:
         if opt == '-h':
@@ -58,10 +58,6 @@ def main(argv):
             redundancy_filtering = (arg=='1')
         elif opt in ("-f", "--filter"):
             filter_choice = int(arg)
-        elif opt in ("-n", "--noise"):
-            noise = (arg=='1')
-        elif opt in ("-d", "--dims"):
-            on_dims = (arxg=='1')
         elif opt in ("-j", "--objt"):
             objs_thres = float(arxg)
         elif opt in ("-d", "--dimt"):
@@ -72,12 +68,12 @@ def main(argv):
     
     print 'reading %s to generate reference clustering...' %(reffile)
     hidden_clustering = read_clusterings(ifile = reffile, basic_fields =CLUSTERING_FIELD_BASIC,measure_fields=[],
-                                contains_noise_ = noise, clustering_on_dimension_ = on_dim, is_cluster_level=True)[0] 
+                                          is_cluster_level=True)[0] 
 
     
     print 'reading %s target clusterings...' %(reffile)
     original_clusterings = read_clusterings(ifile = inputfile, basic_fields=CLUSTERING_FIELD_BASIC,measure_fields=[],
-                                contains_noise_ = noise, clustering_on_dimension_ = on_dim, is_cluster_level=is_at_cluster_level)       
+                                 is_cluster_level=is_at_cluster_level)       
 
     
     func = cardinality_func
@@ -92,6 +88,7 @@ def main(argv):
     print 'length of filtered_clusterings = %d' %(len(filtered_clusterings))
     measures = {'f1':lambda(x): f1_score_clustering(hidden_clustering, x),
                     'entropy': lambda(x): entropy_score_clustering(hidden_clustering, x),
+                'spatial_contiguity': lambda(x): spatial_coherence(x, np.shape(x)[0]),
                     'rnia': lambda(x): rnia_score(hidden_clustering, x),
                     'ce': lambda(x): ce_score(hidden_clustering, x) }
     

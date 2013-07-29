@@ -38,10 +38,10 @@ class TestKmClustering(unittest.TestCase):
                  clustering_id = None, clusters = [cluster1, cluster2, cluster3, cluster4])
         self.assertEqual(clt.clustering_id, "algo_params_1")
 
-        clt = SubspaceClustering(algorithm = "algo", parameters = "params", run = 1,
+        clt = SubspaceClustering(algorithm = "KMEANS", parameters = "params", run = 1,
                  clustering_id = None, clusters = [cluster1, cluster2, cluster3, cluster4])
-        clt.set_clustering_on_dimension(True)
-        self.assertEqual(clt.clustering_id, "algo_(params)_(1)_(1,3,5)")
+        #clt.set_clustering_on_dimension(True)
+        self.assertEqual(clt.clustering_id, "KMEANS_(params)_(1)_(1,3,5)")
         
 
     def test_spatial_coherence(self):
@@ -50,9 +50,9 @@ class TestKmClustering(unittest.TestCase):
         cluster3 = SubspaceCluster(clustering_id = "test1", objects = "8,9", dimensions = "3,2,1")
         cluster4 = SubspaceCluster(clustering_id = "test1", objects = "7", dimensions = "3,2,1")
 
-        clt = SubspaceClustering(algorithm = "algo", parameters = "params", run = 1,
-                 clustering_id = "test1", clusters = [cluster1, cluster2, cluster3, cluster4])
-        self.assertEqual(spatial_coherence(clt, 10)[0], -4.0/3)
+        clt = SubspaceClustering(algorithm = "PROCLUS", parameters = "params", run = 1,
+                 clustering_id = "test1", clusters = [cluster1, cluster2, cluster3, cluster4], max_cardinality=10)
+        self.assertEqual(spatial_coherence(clt)[0], -4.0/3)
 
 
         cluster1 = SubspaceCluster(clustering_id = "test1", objects = "7,1,3,9", dimensions = [3,5,1])
@@ -60,6 +60,6 @@ class TestKmClustering(unittest.TestCase):
         cluster3 = SubspaceCluster(clustering_id = "test1", objects = "4", dimensions = "3,2,1")
         cluster4 = SubspaceCluster(clustering_id = "test1", objects = "0,2,5,6", dimensions = "3,2,1")
 
-        clt = SubspaceClustering(algorithm = "algo", parameters = "params", run = 1,
-                 clustering_id = "test1", clusters = [cluster1, cluster2, cluster3, cluster4])
-        self.assertEqual(spatial_coherence(clt, 10)[0], (8-6.6)/(10-6.6))
+        clt = SubspaceClustering(algorithm = "PROCLUS", parameters = "params", run = 1,
+                 clustering_id = "test1", clusters = [cluster1, cluster2, cluster3, cluster4], max_cardinality=10)
+        self.assertEqual(spatial_coherence(clt)[0], (8-6.6)/(10-6.6))

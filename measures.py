@@ -35,16 +35,22 @@ def expected_number_of_changes(clustering, max_size):
         sum_of_square += len(cluster.objects)**2
     return max_size-sum_of_square*1.0/max_size
 
-def spatial_coherence(clustering, cardinality):    
+def spatial_coherence(clustering):    
     """ the tricky part about computing this measure lies in the fact that some clustering contains only non-noise clusters.
     meaning that sometime we have to know the cardinality of the whole dataset"""
     from collections import defaultdict
 
     if clustering.contains_noise:
         """ add the noisy part as an additional cluster """
+        cardinality = clustering.max_cardinality
         all_objects = set(range(cardinality)) # all objects possible from the data space
         other_objects = all_objects.difference(clustering.get_objects())
-        other_cluster = SubspaceCluster(clustering_id = clustering.clustering_id, objects = other_objects, dimensions="")
+        #print other_objects
+        #print all_objects
+        #print other_objects.__class__.__name__
+        print 'other_cluster-0'
+        other_cluster = SubspaceCluster(clustering_id = clustering.clustering_id, objects = (other_objects), dimensions=[])
+        print 'other_cluster-1'
         all_clusters  = clustering.clusters.append(other_cluster)
         
     
